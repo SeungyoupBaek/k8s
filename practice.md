@@ -36,17 +36,20 @@ $ k get node
 $ k get ns
 # check pod
 $ k get pod
-$ k get pod -A $ k get all
+$ k get pod -A 
+$ k get all
 $ k get all -A
 ```
 
 ### pod command
 ```shell
 # start nginx
-$ k run nginx --image=nginx $ k get pod
+$ k run nginx --image=nginx 
+$ k get pod
 $ k describe pod nginx
 # check minikube dashboard 
 $ minikube dashboard
 # delete pod
-$ k delete pod nginx $ k get pod
+$ k delete pod nginx
+$ k get pod
 ```
