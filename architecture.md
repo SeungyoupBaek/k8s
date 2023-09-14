@@ -36,3 +36,53 @@ $ k describe pod etcd-minikube -n kube-system
   - 어떤 pod가 어떤 node에 스케줄링 될 수 있는지를 제한
   - **Taints** : node가 가지게 되는 성격(ex . taint: blue)
   - **Toleration** : pod가 가지게 되는 taint에 대한 toleration(ex . toleration: blue)
+
+  **Labels and Selector(Affinity)**
+
+  https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+
+  - NodeSelector
+    - node에는 label을 할당하고, pod에는 nodeSelector 필드를 추가하여 특정 node에서 구동되도록 함
+    - 다만, NodeSelector는 여러 값을 할당하거나 Not 예외처리를 하거나 하는 등을 하기는 어려움
+  - NodeAffinity
+    - 여러 advanced 할당을 할 수 있는 만큼 문법이 다소 복잡
+```shell
+# Node
+$ kubectl label nodes node01 size=Large
+```
+
+```yaml
+# Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  nodeSelector:
+    size: Large
+```
+
+```yaml
+# Pod
+apiVersion: v1
+kind: pod
+metadata:
+  name: app-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoreDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: size
+            operator: In(|NotIn|Exists)
+            value:
+            - Large
+            - Medium 
+```
