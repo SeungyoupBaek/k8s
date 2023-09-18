@@ -106,3 +106,87 @@ $ k describe pod kube-controller-manager-minikube -n kube-system
 - 쿠버네티스의 컨트롤러들을 클라우드 서비스 API와 연결해서 관리하는 컴포넌트
 - CSP에 특화된 컨트롤러만을 관리
 - 따라서 on prem환경인 경우 이 컴포넌트는 없음
+
+### kublet
+- 각 쿠버네티스 노드에서 동작하는 node agent
+- 컨테이너 런타임과 연계하여 컨테이너의 기동 및 정지 등을 관리
+- pod 스펙 설정을 kube-apiserver로부터 전달받아 파드 컨테이너의 실행을 직접적으로 관리
+- pod가 아닌 프로세스의 형태로 뜸
+```shell
+# kubelet 확인
+$ minikube status
+# kube-system 네임스페이스의 configmap 확인 
+$ kubectl get configmap -n kube-system
+# kubelet configmap 확인
+$ k describe configmap kubelet-config -n kube-system
+# minikube의 VM으로 로그인
+$ minikube ssh
+# kubelet 확인
+$ ps -ef | grep kubelet
+$ systemctl status kubelet
+# kubelet 로그 확인
+$ journalctl -u kubelet
+```
+
+### kube-proxy
+- 클러스터 내 각 노드에서 실행되는 네트워크 프록시
+- 가상 네트워크의 동작을 관리
+- IP translation과 라우팅
+- kube-proxy가 네트워크를 관리할 때 쓰는 방법
+  - userspace > iptables > ipvs로 진화
+  - ipvs가 더 다양한 로드밸런싱 알고리즘을 갖고 있고 더 높은 성능을 냄
+```shell
+# kubelet configmap 확인
+$ k describe configmap kube-proxy -n kube-system
+# minikube VM 로그인 
+$ minikube ssh
+# 네트워크 모드 확인
+$ curl localhost:10249/proxyMode
+```
+
+### container-runtime
+- 실제로 컨테이너를 실행시키는 런타임 환경
+  - containerd
+  - CRI-O
+  - Docker Engine
+  - Mirantis Container Runtime
+```shell
+# container-runtime 구성 확인
+$ k describe nod minikube | grep -i container
+```
+
+### coredns(kube-dns)
+- 쿠버네티스 클러스터 내부의 주소 해석이나 서비스 디스커버리에 사용되는 내부 DNS 서버(Add-on)
+- kube 1.12 버전 전에는 kube-dns라는 이름이었으나, 이후에는 CoreDNS라는 이름을 사용
+
+| **호스트명** | **네임스페이스** | **타입** | **루트** | **IP 주소** |
+|:--------:|:----------:| :--: | :--: | :--: |
+|  nginx   |    app     | svc | cluster.local | 172.x.x.x |
+| 172-17-0-3 | app | pod(pod명 : nginx | cluster.local | 172.17.0.3 |
+| 172-17-0-5 | default | pod(pod명 : curl) | cluster.local | 172.17.0.5 |
+
+```shell
+$ curl 172-17-0-3.app.pod.cluster.local
+# coredns 구성 확인
+$ k describe configmap coredns -n kube-system
+# 도메인 호출 테스트
+# 네임스페이스 생성 
+$ k create ns app
+# 테스트 pod (nginx) 생성
+$ k run nginx --image nginx -n app $ k get pod -n app
+$ k get pod -n app -o wide
+# 테스트 pod (curl) 생성
+$ kubectl run curl -it --rm --image curlimages/curl -- sh
+# nginx pod 호출 (ip 사용, curl pod안에서) 
+$ curl x.x.x.x
+# nginx pod 호출 (domain record 사용, curl pod안에서) 
+$ curl x-x-x-x.app.pod.cluster.local
+# resolv.conf 확인 (curl pod안에서) 
+$ cat /etc/resolv.conf
+```
+<img src="images/sequence.png" alt="Pod sequence">
+
+- pod creation sequence : https://banzaicloud.com/blog/k8s-custom-scheduler/
+- network : https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/
+- cni : https://github.com/containernetworking/cni
+- port and protocols : https://kubernetes.io/docs/reference/ports-and-protocols/
