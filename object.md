@@ -35,3 +35,13 @@ spec:
       port: 80
       NodePort: 30008
 ```
+
+### status(dictionary)
+- object의 실제 상태를 기술
+- kubernetes control plane은 object의 실제 상태를 의도한 상태에 일치시키기 위한 방향으로 동작
+
+### Node(Worker node)
+- 워크로드가 돌아가는 컨테이너를 배치하는 물리(가상) 머신
+- control plane에 의해 관리
+- 일반적인 운영환경에서는 multi node로 운영
+- 각 노드는 kubelet / container-runtime / kube-proxy 가 포함
