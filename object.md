@@ -45,3 +45,18 @@ spec:
 - control plane에 의해 관리
 - 일반적인 운영환경에서는 multi node로 운영
 - 각 노드는 kubelet / container-runtime / kube-proxy 가 포함
+```shell
+# 노드 리스트 확인
+$ k get node
+$ k get node -o wide
+$ k get node <node name> -o yaml
+$ k describe node <node name>
+$ k cordon <node name>
+$ k uncordon <node name>
+$ k drain <node name> --ignore-daemonsets
+```
+
+### Namespace
+- 동일 물리 클러스터를 기반으로 하는 복수의 가상 클러스터를 지원하는 개념
+- 클러스러를 논리적으로 나누고 액세스를 제한하여 리소스를 생성, 관리
+- 논리적으로 구분되지만 격리된 것은 아님(격리를 위해서는 network policy 같은 다른 오브젝트를 추가로 사용해야 함)
