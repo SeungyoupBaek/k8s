@@ -89,3 +89,102 @@ spec:
     limits.cpu: "10"
     limits.memory: "10Gi"
 ```
+
+```shell
+# namespace 생성 및 확인
+$ k create ns my-app
+$ k get ns --show-labels
+$ k delete ns my-app
+
+# 특정 namespace 내에 있는 자원 확인
+$ k get pod -n kube-system
+$ k get all -n kube-system
+
+# 모든 namespace 내의 자원을 확인
+$ k get all -A
+
+# namespace에 종속된 리소스 확인
+$ k api-resources --namespaced=true
+$ k api-resources --namespaced=false
+```
+
+### Pod
+- 최소 단위 쿠버네티스 객체
+- docker 컨테이너와는 조금 다르게, pod는 하나 이상의 컨테이너를 포함 가능
+- 애플리케이션 컨테이너(하나 또는 다수), 스토리지, 네트워크 등의 정보를 포함
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-prod
+  namespace: app
+  labels: 
+    app: myapp
+    type: front-end
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx
+      ports:
+      - containerports: 8080
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp2-prod
+  namespace: app
+  labels: 
+    app: myapp
+    type: front-end
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx
+    - name: redis-container
+      image: redis:3.2
+```
+
+- k taint nodes node1 app=blue:NoSchedule
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-prod
+  namespace: app
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx
+  tolerations:
+    - key: "app"
+      operator: "Equal"
+      value: "blue"
+      effect: "NoSchedule"
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-prod
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+  affinity:
+    nodeAffinity:
+    requiredDuringSchedulingIgnoreDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key : size
+          operator: In(|NotIn|Exists)
+          value:
+          - Large
+          - Medium
+```
