@@ -188,3 +188,67 @@ spec:
           - Large
           - Medium
 ```
+
+- resource requirement 가 있는 경우
+```yaml
+apiVersion: v1
+kine: Pod
+metadata:
+  name: myapp-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    resource:
+      requests:
+        cpu: 1000m
+        memory: "1Gi"
+      limits:
+        cpu: 3000m
+        memory: "2Gi"
+```
+
+- pod 생성 및 확인
+```shell
+# pod 생성 및 확인
+$ kubectl run nginx --image=nginx
+$ kubectl run nginx2 --image=nginx --dry-run=client -o yaml > pod.yaml
+$ k apply -f pod.yaml
+$ k get pod
+$ k get pod -o wide
+
+# pod 의 로그 확인
+$ k logs nginx
+
+# pod 에 라벨 할당
+$ kubectl label pods nginx app=front-end
+$ k get pod --show-labels
+```
+
+### Replicaset
+- pod 의 레플리카를 생성하고 지정한 pod 수를 유지하는 리소스
+- 기존의 replicaset controller 에서 replicaset 으로 변경
+- https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+```yaml
+apiVersion: apps/v1
+kine: ReplicaSet
+metadata:
+  name: myapp-replicaset
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  template:
+    metadata:
+      name: myapp-prod
+      labels:
+        app: myapp
+        type: front-end
+      spec:
+        containers:
+          - name: nginx-container
+            image: nginx
+  selector:
+    matchLabels:
+      type: front-end
+```
