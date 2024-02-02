@@ -28,3 +28,5 @@
 3. kubernetes cluster에서 IRSA 리소스를 생성하고 Service Account와 IAM 역할을 연결
 4. Pod 매니페스트에서 Service Account를 사용하도록 지정
 
+### Install
+https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.6/deploy/installation/
